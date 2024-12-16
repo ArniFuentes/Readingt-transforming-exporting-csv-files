@@ -19,7 +19,7 @@ def get_date_from_name(file):
         date = file[-12:-4]
         return date[:4], date[-4:-2], date[-2:]
     except Exception as e:
-       raise Exception(f'Error en la función get_date_from_name: {e}')
+        raise Exception(f'Error en la función get_date_from_name: {e}')
 
 
 def clean_duplicates(df):
@@ -36,7 +36,7 @@ def filter_by_date(df, date):
         column_date_type = pd.to_datetime(
             df["Fecha y hora actualizacion tiena x"]).dt.date
         df['Fecha y hora actualizacion tiena x'] = column_date_type
-        return df[df['Fecha y hora actualizacion tiena x'] == target_date]
+        return df[df['Fecha y hora actualizacion tienda x'] == target_date]
     except Exception as e:
         raise Exception(f'Error en la función filter_by_date: {e}')
 
@@ -102,12 +102,19 @@ def save_transformed_file(df, path, file_name):
         raise Exception(f'Error en la función save_transformed_file: {e}')
 
 
-def detect_delimiter(file):
-    try:
-        with open(file, 'r', encoding='windows-1252') as file:
-            sample = file.read(1024)  # Leer los primeros 1024 caracteres
-            sniffer = csv.Sniffer()
-            delimiter = sniffer.sniff(sample).delimiter
-        return delimiter
-    except Exception as e:
-        raise Exception(f'Error en la función detect_delimiter: {e}')
+def detect_delimiter(file, encodings):
+    for encoding in encodings:
+        try:
+            with open(file=file, mode='r', encoding=encoding) as f:
+                file_content = ""
+                # Leer máximo 10 líneas
+                for _ in range(10):
+                    line = f.readline()
+                    if not line:
+                        break
+                    file_content += line
+                sniffer = csv.Sniffer()
+                delimiter = sniffer.sniff(file_content).delimiter
+            return delimiter
+        except Exception as e:
+            raise Exception(f'Error en la función detect_delimiter: {e}')
